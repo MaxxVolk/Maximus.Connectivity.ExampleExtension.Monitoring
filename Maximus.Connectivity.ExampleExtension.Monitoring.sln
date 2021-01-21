@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30907.101
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D4B43EB3-688B-4EEE-86BD-088F0B28ABB3}") = "Maximus.Connectivity.ExampleExtension.Monitoring", "Maximus.Connectivity.ExampleExtension.Monitoring\Maximus.Connectivity.ExampleExtension.Monitoring.mpproj", "{289030E1-A6F4-437C-9363-8574F3DD267B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Maximus.Connectivity.ExampleExtension.Modules", "Maximus.Connectivity.ExampleExtension.Modules\Maximus.Connectivity.ExampleExtension.Modules.csproj", "{B09582E0-3F65-4F63-A319-569AD07CF791}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{289030E1-A6F4-437C-9363-8574F3DD267B}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{289030E1-A6F4-437C-9363-8574F3DD267B}.Debug|x86.ActiveCfg = Debug|x86
+		{289030E1-A6F4-437C-9363-8574F3DD267B}.Debug|x86.Build.0 = Debug|x86
+		{289030E1-A6F4-437C-9363-8574F3DD267B}.Release|Any CPU.ActiveCfg = Release|x86
+		{289030E1-A6F4-437C-9363-8574F3DD267B}.Release|x86.ActiveCfg = Release|x86
+		{289030E1-A6F4-437C-9363-8574F3DD267B}.Release|x86.Build.0 = Release|x86
+		{B09582E0-3F65-4F63-A319-569AD07CF791}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B09582E0-3F65-4F63-A319-569AD07CF791}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B09582E0-3F65-4F63-A319-569AD07CF791}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B09582E0-3F65-4F63-A319-569AD07CF791}.Debug|x86.Build.0 = Debug|Any CPU
+		{B09582E0-3F65-4F63-A319-569AD07CF791}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B09582E0-3F65-4F63-A319-569AD07CF791}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B09582E0-3F65-4F63-A319-569AD07CF791}.Release|x86.ActiveCfg = Release|Any CPU
+		{B09582E0-3F65-4F63-A319-569AD07CF791}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7A43C989-CFDA-46E9-85BD-F5FBBF7ACC2E}
+	EndGlobalSection
+EndGlobal
