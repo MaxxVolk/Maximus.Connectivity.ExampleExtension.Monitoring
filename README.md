@@ -29,7 +29,7 @@ own managed module. To do so, you may refer to my other article at: http://maxco
 
 Open Visual Studio and select _Create a new project_:
 
-![New Project](.\Screenshots\NewProject.png)
+![New Project](.\Screenshots\NewProject.png "New Project")
 
 Type "blank" in the search project type bar (1), then select "Blank Solution" (2) and click _Next_ (3).
 
