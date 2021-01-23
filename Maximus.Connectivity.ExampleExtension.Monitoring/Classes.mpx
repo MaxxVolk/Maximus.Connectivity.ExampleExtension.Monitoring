@@ -1,0 +1,76 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <TypeDefinitions>
+    <EntityTypes>
+      <ClassTypes>
+        <ClassType ID="Maximus.Connectivity.ExampleExtension.ExampleClass" Abstract="false" Accessibility="Public"
+                   Base="MCM!Maximus.Connectivity.Monitoring.Test" Hosted="true">
+          <Property ID="MinValue" Type="int" DefaultValue="-10"/>
+          <Property ID="MaxValue" Type="int" DefaultValue="10"/>
+          <Property ID="FixedValue" Type="int" DefaultValue="0"/>
+          <Property ID="ModuleMode" Type="enum" EnumType="Maximus.Connectivity.ExampleExtension.ExampleClass.ModuleMode.Enumeration"/>
+        </ClassType>
+      </ClassTypes>
+      <EnumerationTypes>
+        <EnumerationValue ID="Maximus.Connectivity.ExampleExtension.ExampleClass.ModuleMode.Enumeration" Accessibility="Public"/>
+        <EnumerationValue ID="Maximus.Connectivity.ExampleExtension.ExampleClass.ModuleMode.Enumeration.FixedValue" Accessibility="Public"
+                          Parent="Maximus.Connectivity.ExampleExtension.ExampleClass.ModuleMode.Enumeration"/>
+        <EnumerationValue ID="Maximus.Connectivity.ExampleExtension.ExampleClass.ModuleMode.Enumeration.RandomValue" Accessibility="Public"
+                          Parent="Maximus.Connectivity.ExampleExtension.ExampleClass.ModuleMode.Enumeration"/>
+      </EnumerationTypes>
+    </EntityTypes>
+  </TypeDefinitions>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <!-- Enumeration: Maximus.Connectivity.ExampleExtension.ExampleClass.ModuleMode.Enumeration -->
+        <DisplayString ElementID="Maximus.Connectivity.ExampleExtension.ExampleClass.ModuleMode.Enumeration.FixedValue">
+          <Name>Fixed Value</Name>
+          <Description>Module will output a constant value.</Description>
+        </DisplayString>
+        <DisplayString ElementID="Maximus.Connectivity.ExampleExtension.ExampleClass.ModuleMode.Enumeration.RandomValue">
+          <Name>Random Value</Name>
+          <Description>Module will output a random value.</Description>
+        </DisplayString>
+        
+        <!-- Class: Maximus.Connectivity.ExampleExtension.ExampleClass -->
+        <DisplayString ElementID="Maximus.Connectivity.ExampleExtension.ExampleClass">
+          <Name>Example Random Number Generator Probe</Name>
+          <Description>This test object is for demonstration purposes only.</Description>
+        </DisplayString>
+        <DisplayString ElementID="Maximus.Connectivity.ExampleExtension.ExampleClass" SubElementID="FixedValue">
+          <Name>Fixed Value</Name>
+          <Description>The module will always output this value when Mode is set to Fixed Value.</Description>
+        </DisplayString>
+        <DisplayString ElementID="Maximus.Connectivity.ExampleExtension.ExampleClass" SubElementID="MaxValue">
+          <Name>Max Value</Name>
+          <Description>Maximum value for random number generator in the Random Value mode.</Description>
+        </DisplayString>
+        <DisplayString ElementID="Maximus.Connectivity.ExampleExtension.ExampleClass" SubElementID="MinValue">
+          <Name>Min Value</Name>
+          <Description>Minimum value for random number generator in the Random Value mode.</Description>
+        </DisplayString>
+        <DisplayString ElementID="Maximus.Connectivity.ExampleExtension.ExampleClass" SubElementID="ModuleMode">
+          <Name>Module Mode</Name>
+          <Description>Select between Random and Fixed modes, when the module either output a preset number (see Fixed Value) or random value (see Min/Max Value).</Description>
+        </DisplayString>
+      </DisplayStrings>
+      <KnowledgeArticles>
+        <KnowledgeArticle ElementID="Maximus.Connectivity.ExampleExtension.ExampleClass">
+          <MamlContent>
+            <section xmlns="http://schemas.microsoft.com/maml/2004/10">
+              <title>Description</title>
+              <para>
+                This test object produces an integer number at the output. The number is either random (when 'Module Mode' is set to Random Value), or a fixed number
+                (when 'Module Mode' is set to Fixed Value). Corresponding monitor compares output number with a set threshold and alert when outside
+                of boundaries.
+              </para>
+              <para>
+                Collect Performance Data is supported: YES
+              </para>
+            </section>
+          </MamlContent>
+        </KnowledgeArticle>
+      </KnowledgeArticles>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPackFragment>

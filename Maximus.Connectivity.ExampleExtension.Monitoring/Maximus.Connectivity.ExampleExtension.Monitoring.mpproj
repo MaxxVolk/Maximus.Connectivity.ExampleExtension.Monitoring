@@ -22,13 +22,25 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DebugSymbols>false</DebugSymbols>
     <OutputPath>bin\Release\</OutputPath>
-    <DelaySigning>false</DelaySigning>
-    <Company>MyCompany</Company>
-    <Copyright>Copyright (c) MyCompany. All rights reserved.</Copyright>
+    <DelaySigning>False</DelaySigning>
+    <Company>Maximus</Company>
+    <Copyright>Copyright (c) Maximus. All rights reserved.</Copyright>
     <DelaySign>false</DelaySign>
-    <AssemblyOriginatorKeyFile />
+    <AssemblyOriginatorKeyFile>C:\Projects\SCOMAuthoring\Maximus.Connectivity.ExampleExtension.Monitoring\.key\Maximus.snk</AssemblyOriginatorKeyFile>
+    <GenerateSealed>True</GenerateSealed>
   </PropertyGroup>
   <ItemGroup>
+    <ManagementPackReference Include="Maximus.Base.Library">
+      <HintPath>C:\Projects\SCOMAuthoring\Maximus.Base.Library\Maximus.Base.Library\bin\Release\Maximus.Base.Library.mpb</HintPath>
+      <Alias>MBL</Alias>
+      <MinVersion>1.0.0.27</MinVersion>
+      <PackageToBundle>False</PackageToBundle>
+    </ManagementPackReference>
+    <ManagementPackReference Include="Maximus.Connectivity.Monitoring">
+      <HintPath>C:\Projects\SCOMAuthoring\Maximus.Connectivity.Monitoring\Maximus.Connectivity.Monitoring\bin\Release\Maximus.Connectivity.Monitoring.mpb</HintPath>
+      <Alias>MCM</Alias>
+      <MinVersion>1.0.0.232</MinVersion>
+    </ManagementPackReference>
     <ManagementPackReference Include="Microsoft.SystemCenter.Library">
       <Alias>SC</Alias>
       <PackageToBundle>false</PackageToBundle>
@@ -49,6 +61,22 @@
       <Alias>Visualization</Alias>
       <PackageToBundle>false</PackageToBundle>
     </ManagementPackReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Classes.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ManagementPack.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Maximus.Connectivity.ExampleExtension.Modules\Maximus.Connectivity.ExampleExtension.Modules.csproj">
+      <Name>Maximus.Connectivity.ExampleExtension.Modules</Name>
+      <Project>{b09582e0-3f65-4f63-a319-569ad07cf791}</Project>
+      <Private>True</Private>
+      <PackageToBundle>True</PackageToBundle>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VSAC\Microsoft.SystemCenter.OperationsManager.targets" />
 </Project>
