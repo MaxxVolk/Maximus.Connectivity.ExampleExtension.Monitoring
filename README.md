@@ -29,16 +29,16 @@ own managed module. To do so, you may refer to my other article at: http://maxco
 
 Open Visual Studio and select _Create a new project_:
 
-![New Project](.\Screenshots\NewProject.png "New Project")
+![New Project](./Screenshots/NewProject.png "New Project")
 
 Type "blank" in the search project type bar (1), then select "Blank Solution" (2) and click _Next_ (3).
 
-![New Blank Solution](.\Screenshots\NewProject_BlankSolution.png)
+![New Blank Solution](./Screenshots/NewProject_BlankSolution.png)
 
 When the new solution is created add two projects. Bring the solution explorer, if it's not on the screen (_View->Solution Explorer or
 Ctrl+Alt+L_). Then right click the solution and select _Add -> New Project_ from the context menu.
 
-![Add New Project](.\Screenshots\NewProject_Add.png)
+![Add New Project](./Screenshots/NewProject_Add.png)
 
 As before search for "Operations Manager 2012 R2 Management Pack" 
 (this project type is not available through any filter), then add this project. Then add another project and
@@ -49,18 +49,18 @@ search (or select) for Class Library (.Net Framework) project type.
 Change active build configuration to _Release_. Either simply select _Release_ at the standard toolbar, or bring 
 up Configuration Manager: _Build -> Configuration Manger_, then change _Active solution configuration_.
 
-![Configuration Manager](.\Screenshots\BuildConfigurationManager.png)
+![Configuration Manager](./Screenshots/BuildConfigurationManager.png)
 
 Now, we need to sign both projects. Right click at the class library project and go to Signing tab. Select 
 _Sign the assemble_ checkbox (1), then either browse for an existing snk file, or choose _New..._ to create one (2).
 
-![Signing Class Library](.\Screenshots\SigningClassLibrary.png)
+![Signing Class Library](./Screenshots/SigningClassLibrary.png)
 
 Then sign the management pack project. Right click at the management pack project and select _Properties_ from 
 the context menu. Go to _Build_ tab. Select _Create sealed and signed management pack_, then browse for snk file. 
 It's recommended to reuse the same key file from the previous step.
 
-![Signing Management Pack](.\Screenshots\SigningManagementPack.png)
+![Signing Management Pack](./Screenshots/SigningManagementPack.png)
 
 The class library project will need references to SCOM Agent base libraries, so we need to add them. SCOM SDK
 libraries can be found in any installation of SCOM Agent, SCOM Server, or SCOM Gateway. Some libraries are 
@@ -78,13 +78,13 @@ Then we need to include the class library resultant DLL file into management pac
 _References_ node in the MP project sub-tree, and select _Add Reference_. Select _Projects_ tab, and select 
 the class library project.
 
-![Add MP reference](.\Screenshots\MPAddReference.png)
+![Add MP reference](./Screenshots/MPAddReference.png)
 
 Then, make Visual Studio to include DLL file into compiled MP bundle. Expand References node of the MP project, 
 find recently added class library reference, and press F4, or right click ans select _Properties_. Set 
 _Package to bundle_ to True.
 
-![Package to bundle](.\Screenshots\PkgToMP.png)
+![Package to bundle](./Screenshots/PkgToMP.png)
 
 Another compulsory reference should be made to link the base Connectivity Monitoring MP. Download Maximus
 Connectivity Monitoring management pack from GitHub https://github.com/MaxxVolk/Maximus.Connectivity.Monitoring
@@ -103,7 +103,7 @@ Now, both projects are ready to add new elements.
 ## 2. Create and decorate test object class.
 Right click the MP project and select _Add -> New Item..._, then select Empty Management Pack Fragment element type.
 
-![Add MP class](.\Screenshots\AddClasses.png)
+![Add MP class](./Screenshots/AddClasses.png)
 
 For this example, I'm going to create a test object, which will initialize a random number generator. 
 So, its corresponding monitor will be compare output number with a set threshold and alert when outside
@@ -196,19 +196,19 @@ menu, and class description will be shown in the description area of _New Test O
 screenshots below. Note, that only `FixedValue` property has proper name and description. This is because
 display string elements are missing for other properties. 
 
-![Main MP Context Menu](.\Screenshots\MainMPUI_NewTestMenu.png)
+![Main MP Context Menu](./Screenshots/MainMPUI_NewTestMenu.png)
 
-![Main MP New Test Object Dialog](.\Screenshots\MainMP_NewTestDialog.png)
+![Main MP New Test Object Dialog](./Screenshots/MainMP_NewTestDialog.png)
 
 _Learn more..._ and _Documentation_ button at active at the screenshot above, and this is because
 there is knowledge article element defined for the test object. As it's shown below, the _Documentation_ window 
 shows the exactly same content, I put into the knowledge article element.
 
-![Main MP Document](.\Screenshots\MainMP_Documentation.png)
+![Main MP Document](./Screenshots/MainMP_Documentation.png)
 
 Similarly, enumeration value names and their descriptions are picked from respective display string elements.
 
-![Main MP Enum display](.\Screenshots\MainMP_Enum.png)
+![Main MP Enum display](./Screenshots/MainMP_Enum.png)
 
 Now it's time to add more display strings for the rest of the object properties and put proper description into the
 knowledge article. After this, my test object is ready.
