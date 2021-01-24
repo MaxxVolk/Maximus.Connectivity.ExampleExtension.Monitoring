@@ -1,0 +1,222 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <TypeDefinitions>
+    <ModuleTypes>
+      <DataSourceModuleType ID="Maximus.Connectivity.ExampleExtension.ExampleClass.Performance.Random.DataSource" Accessibility="Public">
+        <Configuration />
+        <OverrideableParameters />
+        <ModuleImplementation>
+          <Composite>
+            <MemberModules>
+              <DataSource ID="DS_Random" TypeID="Maximus.Connectivity.ExampleExtension.ExampleClass.Random.DataSource" />
+              <ConditionDetection ID="CD_CollectionEnabled" TypeID="System!System.ExpressionFilter">
+                <!-- comparing as string, because the converter is case sensitive, but when value comes from an object, it's capitalized -->
+                <Expression>
+                  <SimpleExpression>
+                    <ValueExpression>
+                      <Value Type="String">$Target/Property[Type="MCM!Maximus.Connectivity.Monitoring.Test"]/CollectPerformanceData$</Value>
+                    </ValueExpression>
+                    <Operator>Equal</Operator>
+                    <ValueExpression>
+                      <Value Type="String">True</Value>
+                    </ValueExpression>
+                  </SimpleExpression>
+                </Expression>
+              </ConditionDetection>
+              <ConditionDetection ID="CD_PerfMapper" TypeID="Perf!System.Performance.DataGenericMapper">
+                <ObjectName>Random</ObjectName>
+                <CounterName>Value</CounterName>
+                <InstanceName />
+                <Value>$Data/Property[@Name='Value']$</Value>
+              </ConditionDetection>
+            </MemberModules>
+            <Composition>
+              <Node ID="CD_PerfMapper">
+                <Node ID="CD_CollectionEnabled">
+                  <Node ID="DS_Random" />
+                </Node>
+              </Node>
+            </Composition>
+          </Composite>
+        </ModuleImplementation>
+        <OutputType>Perf!System.Performance.Data</OutputType>
+      </DataSourceModuleType>
+      <DataSourceModuleType ID="Maximus.Connectivity.ExampleExtension.ExampleClass.Random.DataSource" Accessibility="Public">
+        <Configuration />
+        <OverrideableParameters />
+        <ModuleImplementation>
+          <Composite>
+            <MemberModules>
+              <DataSource ID="DS_Scheduler" TypeID="System!System.SimpleScheduler">
+                <IntervalSeconds>$Target/Property[Type="MCM!Maximus.Connectivity.Monitoring.Test"]/IntervalSeconds$</IntervalSeconds>
+                <SyncTime />
+              </DataSource>
+              <ProbeAction ID="PA_Random" TypeID="Maximus.Connectivity.ExampleExtension.ExampleClass.Random.ProbeAction" />
+            </MemberModules>
+            <Composition>
+              <Node ID="PA_Random">
+                <Node ID="DS_Scheduler" />
+              </Node>
+            </Composition>
+          </Composite>
+        </ModuleImplementation>
+        <OutputType>System!System.PropertyBagData</OutputType>
+      </DataSourceModuleType>
+      <ProbeActionModuleType ID="Maximus.Connectivity.ExampleExtension.ExampleClass.Random.ProbeAction" Accessibility="Public">
+        <Configuration />
+        <OverrideableParameters/>
+        <ModuleImplementation>
+          <Composite>
+            <MemberModules>
+              <ProbeAction ID="PA_SubstituteParametersFromObject" TypeID="Maximus.Connectivity.ExampleExtension.ExampleClass.Random.NativeProbeAction">
+                <TestDisplayName>$Target/Host/Property[Type="System!System.Entity"]/DisplayName$</TestDisplayName>
+                <FullyQualifiedDomainName>$Target/Host/Property[Type="MCM!Maximus.Connectivity.Monitoring.FullyQualifiedDomainName"]/FullyQualifiedDomainName$</FullyQualifiedDomainName>
+                <TargetIndex>$Target/Host/Property[Type="MCM!Maximus.Connectivity.Monitoring.FullyQualifiedDomainName"]/TargetIndex$</TargetIndex>
+                <MinValue>$Target/Property[Type="Maximus.Connectivity.ExampleExtension.ExampleClass"]/MinValue$</MinValue>
+                <MaxValue>$Target/Property[Type="Maximus.Connectivity.ExampleExtension.ExampleClass"]/MaxValue$</MaxValue>
+                <FixedValue>$Target/Property[Type="Maximus.Connectivity.ExampleExtension.ExampleClass"]/FixedValue$</FixedValue>
+                <ModuleMode>$Target/Property[Type="Maximus.Connectivity.ExampleExtension.ExampleClass"]/ModuleMode$</ModuleMode>
+              </ProbeAction>
+            </MemberModules>
+            <Composition>
+              <Node ID="PA_SubstituteParametersFromObject" />
+            </Composition>
+          </Composite>
+        </ModuleImplementation>
+        <OutputType>System!System.PropertyBagData</OutputType>
+        <InputType>System!System.BaseData</InputType>
+      </ProbeActionModuleType>
+      
+      <ProbeActionModuleType ID="Maximus.Connectivity.ExampleExtension.ExampleClass.Random.NativeProbeAction" Accessibility="Internal" >
+        <Configuration>
+          <xsd:element minOccurs="1" name="TestDisplayName" type="xsd:string" />
+          <xsd:element minOccurs="1" name="FullyQualifiedDomainName" type="xsd:string" />
+          <xsd:element minOccurs="1" name="TargetIndex" type="xsd:integer" />
+          <xsd:element minOccurs="1" name="MinValue" type="xsd:integer" />
+          <xsd:element minOccurs="1" name="MaxValue" type="xsd:integer" />
+          <xsd:element minOccurs="1" name="FixedValue" type="xsd:integer" />
+          <xsd:element minOccurs="1" name="ModuleMode" type="xsd:string" />
+        </Configuration>
+        <OverrideableParameters />
+        <ModuleImplementation>
+          <Managed>
+            <Assembly>Maximus.Connectivity.ExampleExtension.Monitoring.Modules.DeployableAssembly</Assembly>
+            <Type>Maximus.Connectivity.ExampleExtension.Modules.ExampleClassPA</Type>
+          </Managed>
+        </ModuleImplementation>
+        <OutputType>System!System.PropertyBagData</OutputType>
+        <InputType>System!System.BaseData</InputType>
+      </ProbeActionModuleType>
+    </ModuleTypes>
+    <MonitorTypes>
+      <UnitMonitorType ID="Maximus.Connectivity.ExampleExtension.ExampleClass.Random.UnitMonitor" Accessibility="Public">
+        <MonitorTypeStates>
+          <MonitorTypeState ID="InRange" NoDetection="false"/>
+          <MonitorTypeState ID="OutOfRance" NoDetection="false"/>
+        </MonitorTypeStates>
+        <Configuration>
+          <xsd:element minOccurs="1" name="MinValue" type="xsd:integer" />
+          <xsd:element minOccurs="1" name="MaxValue" type="xsd:integer" />
+        </Configuration>
+        <OverrideableParameters>
+          <OverrideableParameter ID="MinValue" Selector="$Config/MinValue$" ParameterType="int" />
+          <OverrideableParameter ID="MaxValue" Selector="$Config/MaxValue$" ParameterType="int" />
+        </OverrideableParameters>
+        <MonitorImplementation>
+          <MemberModules>
+            <DataSource ID="DS_Random" TypeID="Maximus.Connectivity.ExampleExtension.ExampleClass.Random.DataSource" />
+            <ProbeAction ID="PA_Random" TypeID="Maximus.Connectivity.ExampleExtension.ExampleClass.Random.ProbeAction" />
+            <ProbeAction ID="PA_Passthrough" TypeID="System!System.PassThroughProbe" />
+            <ConditionDetection ID="CD_InRange" TypeID="System!System.ExpressionFilter">
+              <Expression>
+                <And>
+                  <Expression>
+                    <SimpleExpression>
+                      <ValueExpression>
+                        <XPathQuery Type="Integer">Property[@Name='Value']</XPathQuery>
+                      </ValueExpression>
+                      <Operator>GreaterEqual</Operator>
+                      <ValueExpression>
+                        <Value Type="Integer">$Config/MinValue$</Value>
+                      </ValueExpression>
+                    </SimpleExpression>
+                  </Expression>
+                  <Expression>
+                    <SimpleExpression>
+                      <ValueExpression>
+                        <XPathQuery Type="Integer">Property[@Name='Value']</XPathQuery>
+                      </ValueExpression>
+                      <Operator>LessEqual</Operator>
+                      <ValueExpression>
+                        <Value Type="Integer">$Config/MaxValue$</Value>
+                      </ValueExpression>
+                    </SimpleExpression>
+                  </Expression>
+                </And>
+              </Expression>
+            </ConditionDetection>
+            <ConditionDetection ID="CD_OutOfRance" TypeID="System!System.ExpressionFilter.IntervalSuppression">
+              <Expression>
+                <Or>
+                  <Expression>
+                    <SimpleExpression>
+                      <ValueExpression>
+                        <XPathQuery Type="Integer">Property[@Name='Value']</XPathQuery>
+                      </ValueExpression>
+                      <Operator>Less</Operator>
+                      <ValueExpression>
+                        <Value Type="Integer">$Config/MinValue$</Value>
+                      </ValueExpression>
+                    </SimpleExpression>
+                  </Expression>
+                  <Expression>
+                    <SimpleExpression>
+                      <ValueExpression>
+                        <XPathQuery Type="Integer">Property[@Name='Value']</XPathQuery>
+                      </ValueExpression>
+                      <Operator>Greater</Operator>
+                      <ValueExpression>
+                        <Value Type="Integer">$Config/MaxValue$</Value>
+                      </ValueExpression>
+                    </SimpleExpression>
+                  </Expression>
+                </Or>
+              </Expression>
+              <SuppressionSettings>
+                <MatchCount>$Target/Property[Type="MCM!Maximus.Connectivity.Monitoring.Test"]/MatchCount$</MatchCount>
+                <SampleCount>$Target/Property[Type="MCM!Maximus.Connectivity.Monitoring.Test"]/SampleCount$</SampleCount>
+              </SuppressionSettings>
+            </ConditionDetection>
+          </MemberModules>
+          <RegularDetections>
+            <RegularDetection MonitorTypeStateID="InRange">
+              <Node ID="CD_InRange">
+                <Node ID="DS_Random" />
+              </Node>
+            </RegularDetection>
+            <RegularDetection MonitorTypeStateID="OutOfRance">
+              <Node ID="CD_OutOfRance">
+                <Node ID="DS_Random" />
+              </Node>
+            </RegularDetection>
+          </RegularDetections>
+          <OnDemandDetections>
+            <OnDemandDetection MonitorTypeStateID="InRange">
+              <Node ID="CD_InRange">
+                <Node ID="PA_Random">
+                  <Node ID="PA_Passthrough" />
+                </Node>
+              </Node>
+            </OnDemandDetection>
+            <OnDemandDetection MonitorTypeStateID="OutOfRance">
+              <Node ID="CD_OutOfRance">
+                <Node ID="PA_Random">
+                  <Node ID="PA_Passthrough" />
+                </Node>
+              </Node>
+            </OnDemandDetection>
+          </OnDemandDetections>
+        </MonitorImplementation>
+      </UnitMonitorType>
+    </MonitorTypes>
+  </TypeDefinitions>
+</ManagementPackFragment>

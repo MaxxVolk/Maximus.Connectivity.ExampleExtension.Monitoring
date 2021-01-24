@@ -200,9 +200,9 @@ display string elements are missing for other properties.
 
 ![Main MP New Test Object Dialog](./Screenshots/MainMP_NewTestDialog.png)
 
-_Learn more..._ and _Documentation_ button at active at the screenshot above, and this is because
+The _Learn more..._ label and _Documentation_ button are active at the screenshot above, and this is because
 there is knowledge article element defined for the test object. As it's shown below, the _Documentation_ window 
-shows the exactly same content, I put into the knowledge article element.
+shows exactly the same content, I put into the knowledge article element.
 
 ![Main MP Document](./Screenshots/MainMP_Documentation.png)
 
@@ -364,9 +364,366 @@ So now, I can finalize my probe action by writing the following:
 And it's ready to move to the next stage.
 
 ## 4. Wrap managed module in management pack XML.
+Now I need to let SCOM know how to call my .Net code. To do so, I need to define a Probe Action module type,
+but before doing this, I need to register the containing class library as Deployable Assembly.
+Let's add another empty management pack fragment and call it `Assemblies.mpx` (In the latest VSAE version
+Microsoft added support for deployable assembly templates, however, I prefer use manual coding when I need to change
+version often -- the template doesn't update DLL version easy). Then I put the following XML into the new file.
+This let SCOM engine know, that my management pack contains a library, which should be delivered to all SCOM
+Agents.
+
+For whom, who tried to type this code, they may notice that there is also just Assembly resource type. This describes
+a DLL, which should be delivered to SCOM Console deployments -- it contains console extensions. This is why the 
+parent Connectivity Monitoring MP has both resource types. One with test object probes, and another implementing 
+the UI.
+
+```xml
+<Resources>
+  <DeployableAssembly ID="Maximus.Connectivity.ExampleExtension.Monitoring.Modules.DeployableAssembly" HasNullStream="false"
+                      QualifiedName="Maximus.Connectivity.ExampleExtension.Modules, Version=1.0.0.0, Culture=neutral, PublicKeyToken=fd5098a6a3259696"
+                      FileName="Maximus.Connectivity.ExampleExtension.Modules.dll" Accessibility="Internal">
+  </DeployableAssembly>
+</Resources>
+```
+
+Next I create another empty fragment and call it `Modules.mpx`. In the end of the "making of" article 
+http://maxcoreblog.com/2021/01/11/connectivity-monitoring-scom-management-pack-the-making-of/, defined few
+guidelines, so, according to them, I'm creating Native and Normal probe action version. The native probe action is 
+the most root definition describing input and output data item types, configuration parameters, and implementation 
+class. Note, that `guid` is passed as `string`. This is because SCOM has `guid` as allowed class property type,
+but XML schema doesn't support `guid`. Also note, that the module visibility is set to `Internal`, so other 
+management packs will not be able to call this module.
+
+```xml
+<TypeDefinitions>
+  <ModuleTypes>
+    <ProbeActionModuleType ID="Maximus.Connectivity.ExampleExtension.ExampleClass.Random.NativeProbeAction" Accessibility="Internal" >
+      <Configuration>
+        <xsd:element minOccurs="1" name="TestDisplayName" type="xsd:string" />
+        <xsd:element minOccurs="1" name="FullyQualifiedDomainName" type="xsd:string" />
+        <xsd:element minOccurs="1" name="TargetIndex" type="xsd:integer" />
+        <xsd:element minOccurs="1" name="MinValue" type="xsd:integer" />
+        <xsd:element minOccurs="1" name="MaxValue" type="xsd:integer" />
+        <xsd:element minOccurs="1" name="FixedValue" type="xsd:integer" />
+        <xsd:element minOccurs="1" name="ModuleMode" type="xsd:string" />
+      </Configuration>
+      <OverrideableParameters />
+      <ModuleImplementation>
+        <Managed>
+          <Assembly>Maximus.Connectivity.ExampleExtension.Monitoring.Modules.DeployableAssembly</Assembly>
+          <Type>Maximus.Connectivity.ExampleExtension.Modules.ExampleClassPA</Type>
+        </Managed>
+      </ModuleImplementation>
+      <OutputType>System!System.PropertyBagData</OutputType>
+      <InputType>System!System.BaseData</InputType>
+    </ProbeActionModuleType>
+  </ModuleTypes>
+</TypeDefinitions>
+```
+
+Next turn is for Normal probe action. This probe action gets properties form test object and passes them to
+the native probe action. It's defined as:
+
+```xml
+<ProbeActionModuleType ID="Maximus.Connectivity.ExampleExtension.ExampleClass.Random.ProbeAction" Accessibility="Public">
+  <Configuration />
+  <OverrideableParameters/>
+  <ModuleImplementation>
+    <Composite>
+      <MemberModules>
+        <ProbeAction ID="PA_SubstituteParametersFromObject" TypeID="Maximus.Connectivity.ExampleExtension.ExampleClass.Random.NativeProbeAction">
+          <TestDisplayName>$Target/Host/Property[Type="System!System.Entity"]/DisplayName$</TestDisplayName>
+          <FullyQualifiedDomainName>$Target/Host/Property[Type="MCM!Maximus.Connectivity.Monitoring.FullyQualifiedDomainName"]/FullyQualifiedDomainName$</FullyQualifiedDomainName>
+          <TargetIndex>$Target/Host/Property[Type="MCM!Maximus.Connectivity.Monitoring.FullyQualifiedDomainName"]/TargetIndex$</TargetIndex>
+          <MinValue>$Target/Property[Type="Maximus.Connectivity.ExampleExtension.ExampleClass"]/MinValue$</MinValue>
+          <MaxValue>$Target/Property[Type="Maximus.Connectivity.ExampleExtension.ExampleClass"]/MaxValue$</MaxValue>
+          <FixedValue>$Target/Property[Type="Maximus.Connectivity.ExampleExtension.ExampleClass"]/FixedValue$</FixedValue>
+          <ModuleMode>$Target/Property[Type="Maximus.Connectivity.ExampleExtension.ExampleClass"]/ModuleMode$</ModuleMode>
+        </ProbeAction>
+      </MemberModules>
+      <Composition>
+        <Node ID="PA_SubstituteParametersFromObject" />
+      </Composition>
+    </Composite>
+  </ModuleImplementation>
+  <OutputType>System!System.PropertyBagData</OutputType>
+  <InputType>System!System.BaseData</InputType>
+</ProbeActionModuleType>
+```
+
+Few notes here. 
+  
+  - This is a composite module type. That means it's made as a combination of already existing module. In this case, it's a combination of the single module type.
+  - Prefixes like `System!` or `MCM!` are aliases of referenced management packs. Strictly speaking, management pack element IDs are not unique. More correctly, they are unique within a single management pack, but not between. In other words, you can define a class named `Microsoft.Windows.Computer` in your management pack, and this is legitimate. But after this, result of PowerShell command like `Get-SCOMClass -Name Microsoft.Windows.Computer` is unpredictable. This is why you must explicitly point to destination management pack.
+  - Everything between two dollar signs is called _Management Pack Element Reference_.
+  - MP Reference like `$Target/Host{0-N}/Property[Type="ClassName"]/PropertyName$` reference a property value of an instance of target class. So, if we have an instance of the `ExampleClass`, where `MinValue=-99`, SCOM Agent will replace this reference with`-99` when calling my probe action. Because I'm planning to target my future monitor (where this probe action will be a part of) to the `ExampleClass` all properties of `ExampleClass` will be referenced without `/Host` (number of repetition is zero). But `Destination` class is host of `ExampleClass`, so its property values are references with `/Host`.
+  - `Composition` section always contains nested `Node` nodes. SCOM Agent executes them from the most nested (the innermost).
+
+Next step is to convert the normal probe action into a data source. To make this, I'll combine an existing scheduler
+data source (which isn't really a source of some data, but just issues a triggering empty data item over fixed 
+period of time) with my normal probe action. I'll use another class value property reference, but to a property of 
+parent class of `ExampleClass`, which is `MCM!Maximus.Connectivity.Monitoring.Test`. Note, there no `/Host`
+required, because this is parent, not host class.
+
+**NB!** Don't get confused between host/hosted/hosting relationship and parent/child classes. Hosting describes 
+relationship between independent object in the same way as I can say: _web page is hosted at web server, web server
+hosted at virtual machine, virtual machine is hosted at hypervisor,  hypervisor is hosted at hardware._ By the way,
+if, in this example, I delete the hardware, this will delete everything including the web page. Same is in SCOM.
+Applying to this subject, deleting a destination, will delete all hosted test objects. In contrast, parent/child 
+classes are about class inheritance, like in any object-oriented programming language.
+
+Getting back to the main topic, the Data Source module XML is:
+
+```xml
+<DataSourceModuleType ID="Maximus.Connectivity.ExampleExtension.ExampleClass.Random.DataSource" Accessibility="Public">
+  <Configuration />
+  <OverrideableParameters />
+  <ModuleImplementation>
+    <Composite>
+      <MemberModules>
+        <DataSource ID="DS_Scheduler" TypeID="System!System.SimpleScheduler">
+          <IntervalSeconds>$Target/Property[Type="MCM!Maximus.Connectivity.Monitoring.Test"]/IntervalSeconds$</IntervalSeconds>
+          <SyncTime />
+        </DataSource>
+        <ProbeAction ID="PA_Random" TypeID="Maximus.Connectivity.ExampleExtension.ExampleClass.Random.ProbeAction" />
+      </MemberModules>
+      <Composition>
+        <Node ID="PA_Random">
+          <Node ID="DS_Scheduler" />
+        </Node>
+      </Composition>
+    </Composite>
+  </ModuleImplementation>
+  <OutputType>System!System.PropertyBagData</OutputType>
+</DataSourceModuleType>
+```
+
+Notes:
+
+  - Unlike many other interval Data Source modules, I didn't make interval overrideable parameter. This is because it's defined in test object, first, and second, this will keep cookdown working (see my article on cookdown experiments: http://maxcoreblog.com/2020/08/05/implementing-scom-managed-modules-part-2/)
+  - Data Source modules don't have inputs, so there is no `InputType` section.
 
 ## 5. Create Monitor Type for Unit Monitor and Data Source for performance data collection.
+This data source module, created in the previous part, is the root common workflow for the planned monitor and performance collection rule.
+The monitor will need a monitor type definition, and the performance collection rule will need a data source,
+which returns data items if the `System.Performance.Data` type, therefore the existing data source doesn't
+suit -- it returns `System.PropertyBagData`.
+
+First, I'm creating another composite data source module, which converts data from property bag into
+performance data item. But before doing this, I must add reference to two standard managements packs:
+`System.Performance.Library.mp` and `Microsoft.SystemCenter.DataWarehouse.Library.mp`. The Performance Library
+MP defines the actual data item type, and a "converter", I'm going to use. The DataWarehouse Library is needed
+because performance collection rules should save data into DataWarehouse for reporting.
+
+```xml
+<DataSourceModuleType ID="Maximus.Connectivity.ExampleExtension.ExampleClass.Performance.Random.DataSource" Accessibility="Public">
+  <Configuration />
+  <OverrideableParameters />
+  <ModuleImplementation>
+    <Composite>
+      <MemberModules>
+        <DataSource ID="DS_Random" TypeID="Maximus.Connectivity.ExampleExtension.ExampleClass.Random.DataSource" />
+        <ConditionDetection ID="CD_CollectionEnabled" TypeID="System!System.ExpressionFilter">
+          <!-- comparing as string, because the converter is case sensitive, but when value comes from an object, it's capitalized -->
+          <Expression>
+            <SimpleExpression>
+              <ValueExpression>
+                <Value Type="String">$Target/Property[Type="MCM!Maximus.Connectivity.Monitoring.Test"]/CollectPerformanceData$</Value>
+              </ValueExpression>
+              <Operator>Equal</Operator>
+              <ValueExpression>
+                <Value Type="String">True</Value>
+              </ValueExpression>
+            </SimpleExpression>
+          </Expression>
+        </ConditionDetection>
+        <ConditionDetection ID="CD_PerfMapper" TypeID="Perf!System.Performance.DataGenericMapper">
+          <ObjectName>Random</ObjectName>
+          <CounterName>Value</CounterName>
+          <InstanceName />
+          <Value>$Data/Property[@Name='Value']$</Value>
+        </ConditionDetection>
+      </MemberModules>
+      <Composition>
+        <Node ID="CD_PerfMapper">
+          <Node ID="CD_CollectionEnabled">
+            <Node ID="DS_Random" />
+          </Node>
+        </Node>
+      </Composition>
+    </Composite>
+  </ModuleImplementation>
+  <OutputType>Perf!System.Performance.Data</OutputType>
+</DataSourceModuleType>
+```
+
+Few comments as usual:
+
+  - Normally, if a SCOM administrator wants to turn on or off particular performance metric collection, they have to find metric's corresponding collection rule and enable or disable it. Finding right rule might be very challenging. This is why, in my solution, I made all configuration visible in UI. To make use of UI settings, all performance collection rule must make respect to the `CollectPerformanceData` property value, which controls data collection. All rules linked to a test object must be always enabled, but they must drop data (not push in the databases), if test object says "not collect".
+  - To make this filtering, a condition detection module is included into this composite data source. Condition detection module, is a module with an input and output, which is either pass data item through if it satisfies conditions, or drop it. So, the first condition with Id `CD_CollectionEnabled` don't let data item through, id user opted to not collect performance data.
+  - There is a small trick in the `CD_CollectionEnabled` module: boolean value is being validated as string value. This is certainly a bug in SCOM, but minor.
+  - Second condition detection is not an actual condition. This is a converter. It never drops data item (unless it's malformed), but changes its type.
+
+And now it's time to create Monitor Type. And this will be the first module with not-substituted parameters 
+and the first module with overridable parameters. And the monitor type won't have much notes. This is because 
+there are too many notes to make, but they are about management pack authoring in general, which outside of 
+this manual scope. But I wish, one day I will write a book on authoring.
+
+```xml
+<UnitMonitorType ID="Maximus.Connectivity.ExampleExtension.ExampleClass.Random.UnitMonitor" Accessibility="Public">
+  <MonitorTypeStates>
+    <MonitorTypeState ID="InRange" NoDetection="false"/>
+    <MonitorTypeState ID="OutOfRance" NoDetection="false"/>
+  </MonitorTypeStates>
+  <Configuration>
+    <xsd:element minOccurs="1" name="MinValue" type="xsd:integer" />
+    <xsd:element minOccurs="1" name="MaxValue" type="xsd:integer" />
+  </Configuration>
+  <OverrideableParameters>
+    <OverrideableParameter ID="MinValue" Selector="$Config/MinValue$" ParameterType="int" />
+    <OverrideableParameter ID="MaxValue" Selector="$Config/MaxValue$" ParameterType="int" />
+  </OverrideableParameters>
+  <MonitorImplementation>
+    <MemberModules>
+      <DataSource ID="DS_Random" TypeID="Maximus.Connectivity.ExampleExtension.ExampleClass.Random.DataSource" />
+      <ProbeAction ID="PA_Random" TypeID="Maximus.Connectivity.ExampleExtension.ExampleClass.Random.ProbeAction" />
+      <ProbeAction ID="PA_Passthrough" TypeID="System!System.PassThroughProbe" />
+      <ConditionDetection ID="CD_InRange" TypeID="System!System.ExpressionFilter">
+        <Expression>
+          <And>
+            <Expression>
+              <SimpleExpression>
+                <ValueExpression>
+                  <XPathQuery Type="Integer">Property[@Name='Value']</XPathQuery>
+                </ValueExpression>
+                <Operator>GreaterEqual</Operator>
+                <ValueExpression>
+                  <Value Type="Integer">$Config/MinValue$</Value>
+                </ValueExpression>
+              </SimpleExpression>
+            </Expression>
+            <Expression>
+              <SimpleExpression>
+                <ValueExpression>
+                  <XPathQuery Type="Integer">Property[@Name='Value']</XPathQuery>
+                </ValueExpression>
+                <Operator>LessEqual</Operator>
+                <ValueExpression>
+                  <Value Type="Integer">$Config/MaxValue$</Value>
+                </ValueExpression>
+              </SimpleExpression>
+            </Expression>
+          </And>
+        </Expression>
+      </ConditionDetection>
+      <ConditionDetection ID="CD_OutOfRance" TypeID="System!System.ExpressionFilter.IntervalSuppression">
+        <Expression>
+          <Or>
+            <Expression>
+              <SimpleExpression>
+                <ValueExpression>
+                  <XPathQuery Type="Integer">Property[@Name='Value']</XPathQuery>
+                </ValueExpression>
+                <Operator>Less</Operator>
+                <ValueExpression>
+                  <Value Type="Integer">$Config/MinValue$</Value>
+                </ValueExpression>
+              </SimpleExpression>
+            </Expression>
+            <Expression>
+              <SimpleExpression>
+                <ValueExpression>
+                  <XPathQuery Type="Integer">Property[@Name='Value']</XPathQuery>
+                </ValueExpression>
+                <Operator>Greater</Operator>
+                <ValueExpression>
+                  <Value Type="Integer">$Config/MaxValue$</Value>
+                </ValueExpression>
+              </SimpleExpression>
+            </Expression>
+          </Or>
+        </Expression>
+        <SuppressionSettings>
+          <MatchCount>$Target/Property[Type="MCM!Maximus.Connectivity.Monitoring.Test"]/MatchCount$</MatchCount>
+          <SampleCount>$Target/Property[Type="MCM!Maximus.Connectivity.Monitoring.Test"]/SampleCount$</SampleCount>
+        </SuppressionSettings>
+      </ConditionDetection>
+    </MemberModules>
+    <RegularDetections>
+      <RegularDetection MonitorTypeStateID="InRange">
+        <Node ID="CD_InRange">
+          <Node ID="DS_Random" />
+        </Node>
+      </RegularDetection>
+      <RegularDetection MonitorTypeStateID="OutOfRance">
+        <Node ID="CD_OutOfRance">
+          <Node ID="DS_Random" />
+        </Node>
+      </RegularDetection>
+    </RegularDetections>
+    <OnDemandDetections>
+      <OnDemandDetection MonitorTypeStateID="InRange">
+        <Node ID="CD_InRange">
+          <Node ID="PA_Random">
+            <Node ID="PA_Passthrough" />
+          </Node>
+        </Node>
+      </OnDemandDetection>
+      <OnDemandDetection MonitorTypeStateID="OutOfRance">
+        <Node ID="CD_OutOfRance">
+          <Node ID="PA_Random">
+            <Node ID="PA_Passthrough" />
+          </Node>
+        </Node>
+      </OnDemandDetection>
+    </OnDemandDetections>
+  </MonitorImplementation>
+</UnitMonitorType>
+```
+
+And this was the last bit of XML code in this manual. No boring stuff anymore!
 
 ## 6. Create templates for Monitor and Rule.
+Final step is to actually create the monitor and the collection rule. Right click the management pack project,
+select _Add -> New Item..._ and select _Monitor (Unit)_ template type.
+
+![Add Template](./Screenshots/AddTemplate.png)
+
+Then edit monitor properties as shown at the screenshot below. The small window is an editor for the 
+`Monitor Operational States` property.
+
+![Monitor Properties](./Screenshots/MonitorProperties.png)
+
+The monitor also has set thresholds, which needs to be put into Monitor Configuration as shown below:
+
+![Monitor Configuration](./Screenshots/MonitorCfg.png)
+
+Now, add a new Rule (Performance Collection) template, either to the same template window (by right clicking in 
+`Templates.mptg` editor window), or to a new template file like with the monitor. Set rule's properties as shown:
+
+![Rule Properties](./Screenshots/RuleProperties.png)
+
 
 ## 7. Wrapping up and testing.
+Finally, I can build and deploy my example in to SCOM Management Group. When MP is installed, let's test it.
+Open SCOM Console, select _Monitoring_ section, go to _Maximus Connectivity Monitoring_ folder, and select 
+_Destination State and Editor_ node. Use an existing destination, or add a new one (please refer to the user manual),
+then add a new instance of the _Example Random Number Generator Probe_ test object. 
+Change the highlighted properties as shown and save.
+
+![Rule Random Object](./Screenshots/NewRandomObject.png)
+
+After a minute or few, health status of the new test object should initialize. Then run Health Explorer and see
+the first value:
+
+![Health Explorer](./Screenshots/HealthExplorer.png)
+
+Let it run for several minutes more, and then click _Performance View_ at the _Tasks Pane_ to ensure that
+performance data is collected. Performance View dashboard should look like this. You may need to refresh it 
+a couple of times and select appropriate counter, as well as select time range (say last 15 minutes).
+
+![Health Explorer](./Screenshots/PerformanceView.png)
+
+Finlay, simply wait until next random value gets our of the monitor thresholds, and ensure that alert is triggered.
+
+## The new extension management pack is ready!

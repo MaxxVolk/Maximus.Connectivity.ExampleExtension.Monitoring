@@ -1,0 +1,60 @@
+<TemplateGroup>
+  <Instances>
+    <Instance ID="Instance1cb8bbbf42bb4bd8ba0ce5a2d4aaa2da" Type="Microsoft.SystemCenter.Authoring.CodeGeneration.Monitoring.UnitMonitor" Version="1.0.0.0">
+      <UnitMonitorConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+        <MonitorType>Maximus.Connectivity.ExampleExtension.ExampleClass.Random.UnitMonitor</MonitorType>
+        <MonitorConfig>&lt;MinValue&gt;-5&lt;/MinValue&gt;&lt;MaxValue&gt;5&lt;/MaxValue&gt;</MonitorConfig>
+        <MonitorOperationalStates>
+          <OperationalState>
+            <OperationalStateId>InRange</OperationalStateId>
+            <OperationalStateDisplayName>InRange</OperationalStateDisplayName>
+            <MonitorTypeStateId>InRange</MonitorTypeStateId>
+            <HealthState>Success</HealthState>
+          </OperationalState>
+          <OperationalState>
+            <OperationalStateId>OutOfRance</OperationalStateId>
+            <OperationalStateDisplayName>OutOfRance</OperationalStateDisplayName>
+            <MonitorTypeStateId>OutOfRance</MonitorTypeStateId>
+            <HealthState>Warning</HealthState>
+          </OperationalState>
+        </MonitorOperationalStates>
+        <ParentMonitor>Health!System.Health.AvailabilityState</ParentMonitor>
+        <Accessibility>Public</Accessibility>
+        <Id>ExampleClass.Random.Monitor</Id>
+        <DisplayName>Random Value Monitor</DisplayName>
+        <Description>Demo.</Description>
+        <Target>Maximus.Connectivity.ExampleExtension.ExampleClass</Target>
+        <Enabled>true</Enabled>
+        <Category>AvailabilityHealth</Category>
+        <Remotable>true</Remotable>
+        <Priority>Normal</Priority>
+        <AlertAutoResolve>true</AlertAutoResolve>
+        <AlertOnState>Warning</AlertOnState>
+        <AlertPriority>Normal</AlertPriority>
+        <AlertSeverity>MatchMonitorHealth</AlertSeverity>
+        <AlertName>Random Value not in Range</AlertName>
+        <AlertDescription>Random Value not in Range</AlertDescription>
+        <ConfirmDelivery>false</ConfirmDelivery>
+      </UnitMonitorConfig>
+    </Instance>
+    <Instance ID="Instancec0e3686243754796a22d2ea3aaa7162b" Type="Microsoft.SystemCenter.Authoring.CodeGeneration.Monitoring.PerformanceCollectionRule" Version="1.0.0.0">
+      <PerformanceCollectionRuleConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+        <Id>ExampleClass.Performance.Random.PerformanceCollectionRule</Id>
+        <DisplayName>Random Value Performance Collection Rule</DisplayName>
+        <Description>Demo.</Description>
+        <Category>PerformanceCollection</Category>
+        <ConfirmDelivery>false</ConfirmDelivery>
+        <Target>Maximus.Connectivity.ExampleExtension.ExampleClass</Target>
+        <Enabled>true</Enabled>
+        <Remotable>true</Remotable>
+        <Priority>Normal</Priority>
+        <DiscardLevel>100</DiscardLevel>
+        <ConditionDetectionId>CD</ConditionDetectionId>
+        <DataSourceId>DS</DataSourceId>
+        <DataSourceType>Maximus.Connectivity.ExampleExtension.ExampleClass.Performance.Random.DataSource</DataSourceType>
+        <CollectToDB>true</CollectToDB>
+        <CollectToDW>true</CollectToDW>
+      </PerformanceCollectionRuleConfig>
+    </Instance>
+  </Instances>
+</TemplateGroup>
